@@ -61,10 +61,11 @@ def _get_secret_from_google_colab(name: str) -> Optional[str]:
         except ImportError:
             return None
         try:
+            secret_value = None # initalize value 
             secret_value = userdata.get(name)
 
         except userdata.NotebookAccessError:
-            # Means the user has a secret call `HF_TOKEN` and got a popup "please grand access to HF_TOKEN" and refused it
+            # Means the user has a secret call `name` and got a popup f"please grand access to {name}" and refused it
             # => warn user but ignore error => do not re-request access to user
             if not _IS_GOOGLE_COLAB_CHECKED:
                 warnings.warn(
