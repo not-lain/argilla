@@ -19,7 +19,7 @@ from typing import Optional
 from huggingface_hub.utils._runtime import is_google_colab
 
 
-_IS_GOOGLE_COLAB_CHECKED = False
+_IS_GOOGLE_COLAB_CHECKED = dict()
 _GOOGLE_COLAB_SECRET_LOCK = Lock()
 _GOOGLE_COLAB_SECRET: Optional[dict] = None
 
@@ -61,13 +61,13 @@ def _get_secret_from_google_colab(name: str) -> Optional[str]:
         except ImportError:
             return None
         try:
-            secret_value = None # initalize value 
+            secret_value = None  # initalize value
             secret_value = userdata.get(name)
 
         except userdata.NotebookAccessError:
             # Means the user has a secret call `name` and got a popup f"please grand access to {name}" and refused it
             # => warn user but ignore error => do not re-request access to user
-            if not _IS_GOOGLE_COLAB_CHECKED:
+            if not _IS_GOOGLE_COLAB_CHECKED.get(name, False):
                 warnings.warn(
                     f"\nAccess to the secret {name} has not been granted on this notebook."
                     "\nYou will not be requested again."
@@ -84,7 +84,7 @@ def _get_secret_from_google_colab(name: str) -> Optional[str]:
                 "\nIf the error persists, please let us know by opening an issue on GitHub "
                 "(https://github.com/argilla-io/argilla//issues/new)."
             )
-        _IS_GOOGLE_COLAB_CHECKED = True
+        _IS_GOOGLE_COLAB_CHECKED[name] = True
         return secret_value
 
 
